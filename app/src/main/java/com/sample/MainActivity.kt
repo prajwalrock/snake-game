@@ -156,7 +156,7 @@ fun Board(state: State) {
                  .size(tileSize)
                  .background(
                      Color.Green,
-                     //I need to add something here
+                     CircleShape
                  )
              )
          }
@@ -185,7 +185,7 @@ fun Snake(game: Game)  {
 
 @Composable
 fun Buttons(onDirectionChange: (Pair<Int,Int>) -> Unit) {
-    val buttonSize = Modifier.size(50 .dp)
+    val buttonSize = Modifier.size(50.dp).background(Color.LightGray)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(24.dp)

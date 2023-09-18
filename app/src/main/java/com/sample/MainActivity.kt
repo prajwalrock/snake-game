@@ -68,17 +68,16 @@ data class State(val food: Pair<Int, Int>, val snake: List<Pair<Int, Int>>)
 
 class Game(private val scope: CoroutineScope) {
 
-   private val mutex = Mutex()
+    private val mutex = Mutex()
 
 
     private val mutableState: MutableStateFlow<State> =
-        MutableStateFlow(State(food = Pair(5,5), snake = listOf(Pair(7,7))))
+        MutableStateFlow(State(food = Pair(5, 5), snake = listOf(Pair(7, 7))))
 
     val state: Flow<State> = mutableState
 
-    var move: Pair<Int,Int> = Pair(1,0)
-
-    set(value){
+    var move: Pair<Int, Int> = Pair(1, 0)
+        set(value) {
             scope.launch {
                 mutex.withLock {
                     field = value
@@ -90,10 +89,10 @@ class Game(private val scope: CoroutineScope) {
         scope.launch {
             var snakeLength = 4
 
-            while (true){
+            while (true) {
                 delay(150)
                 mutableState.update {
-                    val newPosition: Pair<Int,Int> = it.snake.first().let { poz ->
+                    val newPosition: Pair<Int, Int> = it.snake.first().let { poz ->
                         mutex.withLock {
                             Pair(
                                 (poz.first + move.first + BOARD_SIZE) % BOARD_SIZE,
@@ -102,15 +101,15 @@ class Game(private val scope: CoroutineScope) {
                         }
                     }
 
-                    if(newPosition == it.food){
+                    if (newPosition == it.food) {
                         snakeLength++
                     }
-                    if(it.snake.contains(newPosition)){
+                    if (it.snake.contains(newPosition)) {
                         snakeLength = 4
                     }
 
                     it.copy(
-                        food = if(newPosition == it.food) Pair(
+                        food = if (newPosition == it.food) Pair(
                             Random().nextInt(BOARD_SIZE),
                             Random().nextInt(BOARD_SIZE)
                         ) else it.food,
@@ -122,7 +121,7 @@ class Game(private val scope: CoroutineScope) {
         }
     }
 
-    companion object{
+    companion object {
         const val BOARD_SIZE = 16
     }
 
@@ -131,41 +130,44 @@ class Game(private val scope: CoroutineScope) {
 @Composable
 fun Board(state: State) {
 
-     BoxWithConstraints(Modifier.padding(16.dp)) {
-         val tileSize = maxWidth / Game.BOARD_SIZE
-         
-         Box(modifier = Modifier
-             .size(maxWidth)
-             .border(2.dp, Color.Green)
-         )
-         
-         Box(
-             Modifier
-                 .offset(x = tileSize * state.food.first, y = tileSize * state.food.second)
-                 .size(tileSize)
-                 .background(
-                     Color.DarkGray, CircleShape
-                 ) )
+    BoxWithConstraints(Modifier.padding(16.dp)) {
+        val tileSize = maxWidth / Game.BOARD_SIZE
 
-         state.snake.forEach{
-             Box(modifier = Modifier
-                 .offset(
-                     x = tileSize * it.first,
-                     y = tileSize * it.second
-                 )
-                 .size(tileSize)
-                 .background(
-                     Color.Green,
-                     CircleShape
-                 )
-             )
-         }
-     }
+        Box(
+            modifier = Modifier
+                .size(maxWidth)
+                .border(2.dp, Color.Green)
+        )
+
+        Box(
+            Modifier
+                .offset(x = tileSize * state.food.first, y = tileSize * state.food.second)
+                .size(tileSize)
+                .background(
+                    Color.DarkGray, CircleShape
+                )
+        )
+
+        state.snake.forEach {
+            Box(
+                modifier = Modifier
+                    .offset(
+                        x = tileSize * it.first,
+                        y = tileSize * it.second
+                    )
+                    .size(tileSize)
+                    .background(
+                        Color.Green,
+                        CircleShape
+                    )
+            )
+        }
+    }
 
 }
 
 @Composable
-fun Snake(game: Game)  {
+fun Snake(game: Game) {
 
     val state = game.state.collectAsState(initial = null)
 
@@ -176,36 +178,38 @@ fun Snake(game: Game)  {
             Board(it)
         }
 
-        Buttons{
+        Buttons {
             game.move = it
         }
     }
-    
+
 }
 
 @Composable
-fun Buttons(onDirectionChange: (Pair<Int,Int>) -> Unit) {
-    val buttonSize = Modifier.size(50.dp).background(Color.LightGray)
+fun Buttons(onDirectionChange: (Pair<Int, Int>) -> Unit) {
+    val buttonSize = Modifier
+        .size(50.dp)
+        .background(Color.LightGray)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(24.dp)
     ) {
-        Button(onClick = { onDirectionChange(Pair(0,-1)) }, modifier = buttonSize ) {
+        Button(onClick = { onDirectionChange(Pair(0, -1)) }, modifier = buttonSize) {
             Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
         }
 
         Row {
-            Button(onClick = { onDirectionChange(Pair(-1,0)) }, modifier = buttonSize ) {
+            Button(onClick = { onDirectionChange(Pair(-1, 0)) }, modifier = buttonSize) {
                 Icon(imageVector = Icons.Default.KeyboardArrowLeft, contentDescription = null)
             }
             Spacer(modifier = buttonSize)
 
-            Button(onClick = { onDirectionChange(Pair(1,0)) }, modifier = buttonSize ) {
+            Button(onClick = { onDirectionChange(Pair(1, 0)) }, modifier = buttonSize) {
                 Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null)
             }
         }
 
-        Button(onClick = { onDirectionChange(Pair(0,1)) }, modifier = buttonSize ) {
+        Button(onClick = { onDirectionChange(Pair(0, 1)) }, modifier = buttonSize) {
             Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)
         }
 
